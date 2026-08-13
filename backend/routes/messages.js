@@ -1,24 +1,9 @@
 const express = require('express');
 const Message = require('../models/Message');
 const auth = require('../middleware/auth');
-const nodemailer = require('nodemailer');
+const { sendMail } = require('../utils/mailer');
 
 const router = express.Router();
-
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
-transporter.verify((error, success) => {
-  if (error) {
-    console.log("MAIL ERROR:", error);
-  } else {
-    console.log("MAIL SERVER READY");
-  }
-});
 
 router.post('/', async (req, res) => {
   try {
@@ -85,8 +70,7 @@ console.log("REPLY:", req.body.reply);
   console.log("SENDING EMAIL TO:", msg.email);
   console.log("REPLY TEXT:", req.body.reply);
 
-  const info = await transporter.sendMail({
-    from: `"Jaydip Parmar" <${process.env.EMAIL_USER}>`,
+  const info = await sendMail({
     to: msg.email,
     subject: `Reply: ${msg.subject || "Your Message"}`,
     html: `

@@ -3,7 +3,7 @@ import { motion, useInView, useMotionValue, useSpring, useScroll, useTransform, 
 import { useTheme } from '../context/ThemeContext';
 import axios from 'axios';
 
-const API = 'https://portfolio-w9xn.onrender.com/api';
+const API = `${import.meta.env.VITE_API_URL}/api`;
 
 /* ─── CountUp ─────────────────────────────────────────────────────────────── */
 function CountUp({ to, duration = 1.5 }) {

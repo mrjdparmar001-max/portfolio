@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
-import { sendMessage } from '../api/api';
+import { sendMessage, getProfile } from '../api/api';
 import { FiMail, FiPhone, FiMapPin, FiSend, FiCheck } from 'react-icons/fi';
-import axios from 'axios';
 
 /* ─── Global CSS (particles, shimmer, ripple, cursor, inputs) ──────────── */
 const STYLES = `
@@ -170,7 +169,7 @@ export default function Contact() {
 
   /* fetch profile — updates only if API responds successfully */
   useEffect(() => {
-    axios.get('https://portfolio-w9xn.onrender.com/api/profile')
+    getProfile()
       .then(({ data }) => {
         const { email, phone, location } = data;
         if (!email && !phone && !location) return; // guard empty response
