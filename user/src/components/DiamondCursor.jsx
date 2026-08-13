@@ -4,7 +4,7 @@ import { useTheme } from '../context/ThemeContext';
 function useDesktopCursor() {
   const [enabled, setEnabled] = useState(() => {
     if (typeof window === 'undefined') return false;
-    return window.innerWidth >= 1024;
+    return window.matchMedia('(min-width: 1024px)').matches;
   });
 
   useEffect(() => {
@@ -29,7 +29,7 @@ function useDesktopCursor() {
  * - Burst expansion rate tuned for smoother feel
  */
 export default function DiamondCursor() {
-  const enabled = useDesktopCursor();
+  const showCursor = useDesktopCursor();
   const { theme } = useTheme();
   const canvasRef = useRef(null);
   const stateRef = useRef({
@@ -122,9 +122,9 @@ export default function DiamondCursor() {
   }, [drawDiamond]);
 
   useEffect(() => {
-    if (!enabled) return undefined;
-
     const canvas = canvasRef.current;
+    if (!canvas) return undefined;
+
     const ctx = canvas.getContext('2d');
     const s = stateRef.current;
 
@@ -135,29 +135,30 @@ export default function DiamondCursor() {
     resize();
     window.addEventListener('resize', resize, { passive: true });
 
-    // FIX: rAF-throttled mousemove — prevents flooding the trail array
-    const onMove = (e) => {
-      if (!s.movePending) {
-        s.movePending = true;
-        requestAnimationFrame(() => {
-          s.mouse.x = e.clientX;
-          s.mouse.y = e.clientY;
-          s.trail.unshift({ x: e.clientX, y: e.clientY });
-          if (s.trail.length > 30) s.trail.pop(); // FIX: 50→30
-          s.movePending = false;
-        });
-      }
-    };
-
-    const onClick = (e) => {
+    const onPointerDown = (e) => {
       s.bursts.push({ x: e.clientX, y: e.clientY, r: 0, alpha: 1 });
     };
+    window.addEventListener('pointerdown', onPointerDown, { passive: true });
 
-    window.addEventListener('mousemove', onMove, { passive: true }); // FIX: passive
-    window.addEventListener('click', onClick);
-    document.documentElement.style.cursor = 'none';
+    let onMove = null;
+    if (showCursor) {
+      onMove = (e) => {
+        if (!s.movePending) {
+          s.movePending = true;
+          requestAnimationFrame(() => {
+            s.mouse.x = e.clientX;
+            s.mouse.y = e.clientY;
+            s.trail.unshift({ x: e.clientX, y: e.clientY });
+            if (s.trail.length > 30) s.trail.pop();
+            s.movePending = false;
+          });
+        }
+      };
+      window.addEventListener('mousemove', onMove, { passive: true });
+      document.documentElement.style.cursor = 'none';
+    }
 
-    const TRAIL = 20; // FIX: was 28 — fewer diamonds per frame
+    const TRAIL = 20;
 
     const animate = () => {
       s.rafId = requestAnimationFrame(animate);
@@ -165,19 +166,36 @@ export default function DiamondCursor() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       const color = s.color;
-      const end = Math.min(s.trail.length, TRAIL);
 
-      // Trail (oldest → newest)
-      for (let i = end - 1; i >= 0; i--) {
-        const t = s.trail[i];
-        const progress = 1 - i / TRAIL;
-        const size = 14 * 0.26 * progress;
-        const alpha = progress * 0.55;
-        const rot = (i * 0.22) % (Math.PI * 2);
-        drawDiamond(ctx, t.x, t.y, size, color, alpha, rot);
+      if (showCursor) {
+        const end = Math.min(s.trail.length, TRAIL);
+
+        for (let i = end - 1; i >= 0; i--) {
+          const t = s.trail[i];
+          const progress = 1 - i / TRAIL;
+          const size = 14 * 0.26 * progress;
+          const alpha = progress * 0.55;
+          const rot = (i * 0.22) % (Math.PI * 2);
+          drawDiamond(ctx, t.x, t.y, size, color, alpha, rot);
+        }
+
+        const wobble = Math.sin(s.frame * 0.07) * 1.8;
+        const spin = Math.sin(s.frame * 0.035) * 0.28;
+        drawDiamond(ctx, s.mouse.x, s.mouse.y + wobble, 16, color, 1, spin);
+
+        ctx.save();
+        ctx.translate(s.mouse.x, s.mouse.y + wobble);
+        ctx.rotate(spin);
+        ctx.globalAlpha = 0.85;
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 0.7;
+        ctx.beginPath();
+        ctx.moveTo(0, -16); ctx.lineTo(9.9, 0);
+        ctx.moveTo(0, -16); ctx.lineTo(-9.9, 0);
+        ctx.stroke();
+        ctx.restore();
       }
 
-      // Click bursts
       for (let i = s.bursts.length - 1; i >= 0; i--) {
         const b = s.bursts[i];
         drawBurst(ctx, b, color);
@@ -185,24 +203,6 @@ export default function DiamondCursor() {
         b.alpha -= 0.04;
         if (b.alpha <= 0) s.bursts.splice(i, 1);
       }
-
-      // Main cursor
-      const wobble = Math.sin(s.frame * 0.07) * 1.8;
-      const spin   = Math.sin(s.frame * 0.035) * 0.28;
-      drawDiamond(ctx, s.mouse.x, s.mouse.y + wobble, 16, color, 1, spin);
-
-      // Inner cross
-      ctx.save();
-      ctx.translate(s.mouse.x, s.mouse.y + wobble);
-      ctx.rotate(spin);
-      ctx.globalAlpha = 0.85;
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth = 0.7;
-      ctx.beginPath();
-      ctx.moveTo(0, -16); ctx.lineTo(9.9, 0);
-      ctx.moveTo(0, -16); ctx.lineTo(-9.9, 0);
-      ctx.stroke();
-      ctx.restore();
     };
 
     animate();
@@ -210,13 +210,11 @@ export default function DiamondCursor() {
     return () => {
       cancelAnimationFrame(s.rafId);
       window.removeEventListener('resize', resize);
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('click', onClick);
+      window.removeEventListener('pointerdown', onPointerDown);
+      if (onMove) window.removeEventListener('mousemove', onMove);
       document.documentElement.style.cursor = '';
     };
-  }, [enabled, drawDiamond, drawBurst]);
-
-  if (!enabled) return null;
+  }, [showCursor, drawDiamond, drawBurst]);
 
   return (
     <canvas
