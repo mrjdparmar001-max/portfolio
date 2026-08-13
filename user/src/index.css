@@ -138,3 +138,14 @@ input:focus, textarea:focus {
   .compliment-box   { padding: 16px !important; }
 }
 
+.projects-track::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  #projects {
+    padding-top: 80px !important;
+    padding-bottom: 70px !important;
+  }
+}
+
