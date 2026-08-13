@@ -31,10 +31,8 @@ export default function Compliments() {
 
   return (
     <div>
-      <h2 style={{ color: '#fff', fontSize: isMobile ? 22 : 28, fontWeight: 800, marginBottom: 4 }}>
-        Compliments
-      </h2>
-      <p style={{ color: '#a0a0b0', marginBottom: 24 }}>
+      <h2 className="admin-page-title" style={{ marginBottom: 4 }}>Compliments</h2>
+      <p className="admin-page-subtitle" style={{ marginBottom: 24 }}>
         {compliments.filter(c => !c.approved).length} pending approval
       </p>
 

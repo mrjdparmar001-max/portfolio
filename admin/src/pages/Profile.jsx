@@ -197,19 +197,19 @@ const [avatar, setAvatar] = useState('');
     return (
       <div>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-          <h1 style={{ color: '#fff', fontSize: 28, fontWeight: 800, marginBottom: 8 }}>Profile</h1>
-          <p style={{ color: '#a0a0b0', marginBottom: 40 }}>
+          <h1 className="admin-page-title" style={{ marginBottom: 8 }}>Profile</h1>
+          <p className="admin-page-subtitle" style={{ marginBottom: 40 }}>
             Manage your profile photo, contact info and resume.
           </p>
 
           {/* ── Avatar Upload Card ── */}
-          <div style={{ maxWidth: 520, background: '#12121a', border: '1px solid #2a2a3e', borderRadius: 20, padding: 36, marginBottom: 32 }}>
+          <div className="admin-profile-card">
             <h2 style={{ color: '#fff', fontSize: 18, fontWeight: 700, marginBottom: 6 }}>Profile Photo</h2>
             <p style={{ color: '#a0a0b0', fontSize: 13, marginBottom: 24 }}>
               This photo is shown on the user-facing portfolio hero section.
             </p>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
+            <div className="admin-profile-avatar-row">
               {/* Preview */}
               <div style={{ position: 'relative', flexShrink: 0 }}>
                 <div style={{
@@ -315,7 +315,7 @@ const [avatar, setAvatar] = useState('');
           </div>
 
           {/* ── Contact Info Card ── */}
-          <div style={{ maxWidth: 520, background: '#12121a', border: '1px solid #2a2a3e', borderRadius: 20, padding: 36, marginBottom: 32 }}>
+          <div className="admin-profile-card">
             <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
               {fields.map(({ key, label, icon, type, placeholder }) => (
                 <div key={key}>
@@ -369,7 +369,7 @@ const [avatar, setAvatar] = useState('');
           </div>
 
           {/* ── Social Links Card ── */}
-          <div style={{ maxWidth: 520, background: '#12121a', border: '1px solid #2a2a3e', borderRadius: 20, padding: 36, marginBottom: 32 }}>
+          <div className="admin-profile-card">
             <h2 style={{ color: '#fff', fontSize: 18, fontWeight: 700, marginBottom: 6 }}>Social Links</h2>
             <p style={{ color: '#a0a0b0', fontSize: 13, marginBottom: 24 }}>These links power the icons in the Hero and Footer sections.</p>
             <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -407,12 +407,12 @@ const [avatar, setAvatar] = useState('');
           </div>
 
           {/* ── About Stats Card ── */}
-          <div style={{ maxWidth: 520, background: '#12121a', border: '1px solid #2a2a3e', borderRadius: 20, padding: 36, marginBottom: 32 }}>
+          <div className="admin-profile-card">
             <h2 style={{ color: '#fff', fontSize: 18, fontWeight: 700, marginBottom: 6 }}>About Stats</h2>
             <p style={{ color: '#a0a0b0', fontSize: 13, marginBottom: 24 }}>These numbers appear in the About section stat cards on the user site.</p>
 
             {/* Live preview */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 28 }}>
+            <div className="admin-stats-grid">
               {[
                 {
                   icon: <FiTrendingUp />, label: 'Experience',
@@ -442,7 +442,7 @@ const [avatar, setAvatar] = useState('');
                 <label style={{ color: '#a0a0b0', fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1, display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
                   <span style={{ color: '#6c63ff' }}><FiTrendingUp /></span> Experience
                 </label>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+                <div className="admin-exp-grid">
                   <div>
                     <label style={{ color: '#a0a0b0', fontSize: 11, marginBottom: 6, display: 'block' }}>Years</label>
                     <input type="number" min={0} max={50} value={form.expYears}
@@ -519,7 +519,7 @@ const [avatar, setAvatar] = useState('');
           </div>
 
           {/* ── Resume Upload Card ── */}
-          <div style={{ maxWidth: 520, background: '#12121a', border: '1px solid #2a2a3e', borderRadius: 20, padding: 36 }}>
+          <div className="admin-profile-card" style={{ marginBottom: 0 }}>
             <h2 style={{ color: '#fff', fontSize: 18, fontWeight: 700, marginBottom: 6 }}>Resume / CV</h2>
             <p style={{ color: '#a0a0b0', fontSize: 13, marginBottom: 24 }}>Upload a PDF — users can download it directly from the Hero section.</p>
 

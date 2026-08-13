@@ -49,8 +49,8 @@ export default function Messages({ onUpdate }) {
 
   return (
     <div>
-      <h2 style={{ color: '#fff', fontSize: 28, fontWeight: 800, marginBottom: 4 }}>Messages</h2>
-      <p style={{ color: '#a0a0b0', marginBottom: 32 }}>{messages.filter(m => !m.read).length} unread messages</p>
+      <h2 className="admin-page-title">Messages</h2>
+      <p className="admin-page-subtitle" style={{ marginBottom: 32 }}>{messages.filter(m => !m.read).length} unread messages</p>
 
       {messages.length === 0 ? (
         <div style={{ textAlign: 'center', color: '#a0a0b0', padding: 80 }}>
@@ -73,13 +73,7 @@ export default function Messages({ onUpdate }) {
               }}
             >
               <div
-                style={{
-                  padding: '20px 24px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 16,
-                  cursor: 'pointer',
-                }}
+                className="admin-message-header"
                 onClick={() => handleExpand(msg)}
               >
                 <div style={{
@@ -90,15 +84,15 @@ export default function Messages({ onUpdate }) {
                 }}>
                   {msg.name[0].toUpperCase()}
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                <div className="admin-message-meta">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
                     <span style={{ color: '#fff', fontWeight: 700, fontSize: 15 }}>{msg.name}</span>
                     {!msg.read && <span style={{ background: '#6c63ff', color: '#fff', borderRadius: 20, padding: '1px 8px', fontSize: 10, fontWeight: 700 }}>NEW</span>}
                     {msg.replied && <span style={{ background: '#43e97b20', color: '#43e97b', borderRadius: 20, padding: '1px 8px', fontSize: 10, fontWeight: 700 }}>REPLIED</span>}
                   </div>
-                  <div style={{ color: '#a0a0b0', fontSize: 13 }}>{msg.email} · {msg.subject || 'No subject'}</div>
+                  <div className="admin-message-email" style={{ color: '#a0a0b0', fontSize: 13 }}>{msg.email} · {msg.subject || 'No subject'}</div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div className="admin-message-actions">
                   <span style={{ color: '#a0a0b0', fontSize: 12 }}>
                     {new Date(msg.createdAt).toLocaleDateString()}
                   </span>
@@ -123,7 +117,7 @@ export default function Messages({ onUpdate }) {
                     exit={{ height: 0, opacity: 0 }}
                     style={{ overflow: 'hidden' }}
                   >
-                    <div style={{ padding: '0 24px 24px', borderTop: '1px solid #2a2a3e' }}>
+                    <div style={{ padding: '0 clamp(16px, 4vw, 24px) 24px', borderTop: '1px solid #2a2a3e' }}>
                       <p style={{ color: '#ccc', lineHeight: 1.8, padding: '20px 0', fontSize: 15 }}>
                         {msg.message}
                       </p>
@@ -135,7 +129,7 @@ export default function Messages({ onUpdate }) {
                         </div>
                       )}
 
-                      <div style={{ display: 'flex', gap: 12 }}>
+                      <div className="admin-reply-row">
                         <input
                           placeholder="Type your reply..."
                           value={replyText[msg._id] || ''}

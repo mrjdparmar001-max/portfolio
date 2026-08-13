@@ -39,18 +39,18 @@ export default function Skills() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
+      <div className="admin-page-header">
         <div>
-          <h2 style={{ color: '#fff', fontSize: 28, fontWeight: 800, marginBottom: 4 }}>Tech Stack</h2>
-          <p style={{ color: '#a0a0b0' }}>{skills.length} categories — changes reflect live on user site</p>
+          <h2 className="admin-page-title">Tech Stack</h2>
+          <p className="admin-page-subtitle">{skills.length} categories — changes reflect live on user site</p>
         </div>
         <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={openAdd}
-          style={{ background: 'linear-gradient(135deg, #6c63ff, #ff6584)', border: 'none', borderRadius: 12, padding: '12px 24px', color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+          className="admin-btn-primary">
           <FiPlus /> Add Category
         </motion.button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20 }}>
+      <div className="admin-grid-wide">
         {skills.map((s, i) => (
           <motion.div key={s._id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
             style={{ background: '#1a1a2e', border: '1px solid #2a2a3e', borderRadius: 16, padding: 24 }}>
@@ -87,7 +87,7 @@ export default function Skills() {
             style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }}
             onClick={e => e.target === e.currentTarget && setShowForm(false)}>
             <motion.div initial={{ scale: 0.9, y: 40 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 40 }}
-              style={{ background: '#1a1a2e', border: '1px solid #2a2a3e', borderRadius: 24, padding: 40, width: '100%', maxWidth: 480 }}>
+              className="admin-modal-panel" style={{ maxWidth: 480 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 }}>
                 <h3 style={{ color: '#fff', fontSize: 20, fontWeight: 700 }}>{editing ? 'Edit Category' : 'Add Category'}</h3>
                 <motion.button whileHover={{ scale: 1.1 }} onClick={() => setShowForm(false)}

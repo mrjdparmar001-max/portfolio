@@ -22,23 +22,12 @@ export default function Login({ onLogin }) {
   };
 
   return (
-    <div style={{
-      minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0a0a0f 100%)',
-    }}>
+    <div className="admin-login-wrap">
       <motion.div
         initial={{ opacity: 0, y: 40, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.5 }}
-        style={{
-          background: '#1a1a2e',
-          border: '1px solid #2a2a3e',
-          borderRadius: 24,
-          padding: 48,
-          width: '100%',
-          maxWidth: 420,
-          boxShadow: '0 40px 80px rgba(108,99,255,0.15)',
-        }}
+        className="admin-login-card"
       >
         <div style={{ textAlign: 'center', marginBottom: 40 }}>
           <motion.div
@@ -53,7 +42,7 @@ export default function Login({ onLogin }) {
           >
             🔐
           </motion.div>
-          <h1 style={{ color: '#fff', fontSize: 28, fontWeight: 800, marginBottom: 8 }}>Admin Panel</h1>
+          <h1 className="admin-page-title" style={{ textAlign: 'center', marginBottom: 8 }}>Admin Panel</h1>
           <p style={{ color: '#a0a0b0', fontSize: 14 }}>Jaydip Parmar Portfolio</p>
         </div>
 

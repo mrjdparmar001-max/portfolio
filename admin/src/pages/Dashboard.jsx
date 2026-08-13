@@ -11,10 +11,10 @@ export default function Dashboard({ stats }) {
 
   return (
     <div>
-      <h2 style={{ color: '#fff', fontSize: 28, fontWeight: 800, marginBottom: 8 }}>Dashboard</h2>
-      <p style={{ color: '#a0a0b0', marginBottom: 40 }}>Welcome back, Jaydip! 👋</p>
+      <h2 className="admin-page-title" style={{ marginBottom: 8 }}>Dashboard</h2>
+      <p className="admin-page-subtitle" style={{ marginBottom: 40 }}>Welcome back, Jaydip! 👋</p>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 20 }}>
+      <div className="admin-grid-cards">
         {cards.map(({ label, value, icon, color }, i) => (
           <motion.div
             key={label}
@@ -53,7 +53,7 @@ export default function Dashboard({ stats }) {
           background: '#1a1a2e',
           border: '1px solid #2a2a3e',
           borderRadius: 20,
-          padding: 32,
+          padding: 'clamp(20px, 4vw, 32)',
         }}
       >
         <h3 style={{ color: '#fff', fontSize: 18, fontWeight: 700, marginBottom: 16 }}>Quick Actions</h3>

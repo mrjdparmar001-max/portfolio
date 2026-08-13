@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiGrid, FiFolder, FiMail, FiStar,
   FiLogOut, FiUser, FiCode,
 } from 'react-icons/fi';
+import useBreakpoint from '../hooks/useBreakpoint';
 
 const navItems = [
   { id: 'dashboard',   label: 'Dashboard',  icon: <FiGrid /> },
@@ -14,23 +15,14 @@ const navItems = [
   { id: 'profile',     label: 'Profile',    icon: <FiUser /> },
 ];
 
-/* ── breakpoints ── */
-function useBreakpoint() {
-  const [bp, setBp] = useState(() => {
-    if (typeof window === 'undefined') return 'desktop';
-    const w = window.innerWidth;
-    return w < 768 ? 'mobile' : w < 1024 ? 'tablet' : 'desktop';
-  });
-  useEffect(() => {
-    const calc = () => {
-      const w = window.innerWidth;
-      setBp(w < 768 ? 'mobile' : w < 1024 ? 'tablet' : 'desktop');
-    };
-    window.addEventListener('resize', calc);
-    return () => window.removeEventListener('resize', calc);
-  }, []);
-  return bp; // 'mobile' | 'tablet' | 'desktop'
-}
+const mobileLabels = {
+  dashboard: 'Home',
+  projects: 'Projects',
+  messages: 'Inbox',
+  compliments: 'Reviews',
+  skills: 'Skills',
+  profile: 'Profile',
+};
 
 /* ── Tooltip (used in rail mode) ── */
 function Tooltip({ label }) {
@@ -243,13 +235,18 @@ function BottomNav({ active, setActive, counts }) {
       transition={{ type: 'spring', stiffness: 260, damping: 24 }}
       style={{
         position: 'fixed',
-        bottom: 0, left: 0, right: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
         background: '#12121a',
         borderTop: '1px solid #2a2a3e',
         display: 'flex',
-        justifyContent: 'space-around',
-        padding: '8px 4px 10px',
+        justifyContent: 'space-between',
+        gap: 2,
+        padding: '8px 6px calc(10px + env(safe-area-inset-bottom))',
         zIndex: 100,
+        overflowX: 'auto',
+        WebkitOverflowScrolling: 'touch',
       }}
     >
       {navItems.map(({ id, label, icon }) => {
@@ -265,8 +262,8 @@ function BottomNav({ active, setActive, counts }) {
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
               background: 'transparent', border: 'none', cursor: 'pointer',
               color: isActive ? '#6c63ff' : '#a0a0b0',
-              fontSize: 11, padding: '6px 8px', borderRadius: 10,
-              minWidth: 44, position: 'relative',
+              fontSize: 11, padding: '6px 4px', borderRadius: 10,
+              minWidth: 52, flex: '1 1 0', position: 'relative',
               transition: 'color 0.2s',
             }}
           >
@@ -277,7 +274,9 @@ function BottomNav({ active, setActive, counts }) {
             >
               {icon}
             </motion.span>
-            <span style={{ fontSize: 10, fontWeight: isActive ? 700 : 400 }}>{label}</span>
+            <span style={{ fontSize: 9, fontWeight: isActive ? 700 : 400, lineHeight: 1.2, textAlign: 'center' }}>
+              {mobileLabels[id] || label}
+            </span>
             {counts?.[id] > 0 && (
               <span style={{
                 position: 'absolute', top: 4, right: 8,
@@ -303,11 +302,8 @@ function BottomNav({ active, setActive, counts }) {
 }
 
 /* ── Main export ── */
-export default function Sidebar({ active, setActive, onLogout, counts }) {
-  const bp = useBreakpoint();
-
-  /* sidebar offset for main content — consume this in your layout */
-  const sidebarWidth = bp === 'desktop' ? 240 : bp === 'tablet' ? 68 : 0;
+export default function Sidebar({ active, setActive, onLogout, counts, bp: bpProp }) {
+  const bp = bpProp || useBreakpoint();
 
   return (
     <>
@@ -323,17 +319,6 @@ export default function Sidebar({ active, setActive, onLogout, counts }) {
       {bp === 'mobile' && (
         <BottomNav active={active} setActive={setActive} counts={counts} />
       )}
-
-      {/*
-        In your root layout, offset the main content like so:
-        <main style={{
-          marginLeft: sidebarWidth,
-          paddingBottom: bp === 'mobile' ? 72 : 0,
-          transition: 'margin-left 0.3s',
-        }}>
-          ...page content...
-        </main>
-      */}
     </>
   );
 }
