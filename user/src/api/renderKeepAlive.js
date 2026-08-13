@@ -1,14 +1,4 @@
-import React from 'react';
-  
-  const RenderKeepAlive = () =>  {
-	return (
-	  <div>
-	  </div>
-	);
-  }
-  
-  export default RenderKeepAlive;
-  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export function attachRenderRetry(client, maxRetries = 4) {
   client.interceptors.response.use(

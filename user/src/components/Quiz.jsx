@@ -53,7 +53,7 @@ const OUTFIT_INTERVAL_MS = 3600 * 1000;
 const EMOTION_DURATION = {
   correct: 1400,
   wrong:   1400,
-  skipped:  900,
+  skipped: 1400,
 };
 
 // ─── Security helpers ────────────────────────────────────────────────────────
@@ -607,7 +607,7 @@ function ModeScreen({ selectedMode, onSelectMode, onBack, onStart, theme }) {
   );
 }
 
-function PlayingScreen({ qs, cur, answered, sel, fill, onFillChange, score, streak, mode, timeLeft, timeExpired, results, onMCQ, onTF, onFill, onSkip, getCorrectAnswer, theme }) {
+function PlayingScreen({ qs, cur, answered, sel, fill, onFillChange, score, streak, mode, timeLeft, results, onMCQ, onTF, onFill, getCorrectAnswer, theme }) {
   const q = qs[cur];
   if (!q) return null;
   const M = MODES.find(x => x.id === mode) || MODES[1];
@@ -656,20 +656,12 @@ function PlayingScreen({ qs, cur, answered, sel, fill, onFillChange, score, stre
         <div style={{ height: "100%", background: theme?.gradient || "linear-gradient(90deg,#8b5cf6,#ec4899)", borderRadius: 10, width: `${((cur + 1) / TOTAL) * 100}%`, transition: "width .5s ease" }} />
       </div>
 
-      {timeExpired && !answered && (
-        <div style={{
-          marginBottom: 16, padding: "12px 16px", borderRadius: 12,
-          background: "rgba(251,191,36,.12)", border: "1px solid rgba(251,191,36,.35)",
-          color: "#fbbf24", fontSize: 13, fontWeight: 600, textAlign: "center",
-        }}>
-          ⏰ Time&apos;s up — you can still answer, or skip this question.
-        </div>
-      )}
-
       <div id="qcard" style={{ ...card, background: cardBg, border: `1px solid ${borderColor}` }}>
         <h3 style={{ fontSize: "clamp(16px,2.5vw,20px)", fontWeight: 700, lineHeight: 1.55, marginBottom: 24, whiteSpace: "pre-line", color: textColor }}>{q.q}</h3>
 
-        {q.t === "mcq" && (
+        {q.t === "mcq" && (() => {
+          const lastR = results[results.length - 1];
+          return (
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {q.o.map((opt, i) => {
               const correct = answered && i === getCorrectAnswer(cur);
@@ -691,10 +683,19 @@ function PlayingScreen({ qs, cur, answered, sel, fill, onFillChange, score, stre
                 </button>
               );
             })}
+            {answered && lastR?.timedOut && (
+              <div style={{ marginTop: 6, padding: "11px 14px", borderRadius: 12, fontSize: 13, background: "rgba(251,191,36,.1)", border: "1px solid rgba(251,191,36,.35)", color: "#fbbf24" }}>
+                ⏰ Time&apos;s up — question skipped
+              </div>
+            )}
           </div>
-        )}
+          );
+        })()}
 
-        {q.t === "truefalse" && (
+        {q.t === "truefalse" && (() => {
+          const lastR = results[results.length - 1];
+          return (
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <div style={{ display: "flex", gap: 12 }}>
             {[true, false].map(v => {
               const correct = answered && v === getCorrectAnswer(cur);
@@ -709,7 +710,14 @@ function PlayingScreen({ qs, cur, answered, sel, fill, onFillChange, score, stre
               );
             })}
           </div>
-        )}
+          {answered && lastR?.timedOut && (
+            <div style={{ marginTop: 6, padding: "11px 14px", borderRadius: 12, fontSize: 13, background: "rgba(251,191,36,.1)", border: "1px solid rgba(251,191,36,.35)", color: "#fbbf24" }}>
+              ⏰ Time&apos;s up — question skipped
+            </div>
+          )}
+          </div>
+          );
+        })()}
 
         {q.t === "fill" && (() => {
           const lastR = results[results.length - 1];
@@ -745,35 +753,13 @@ function PlayingScreen({ qs, cur, answered, sel, fill, onFillChange, score, stre
                 )}
               </div>
               {answered && lastR && (
-                <div style={{ marginTop: 10, padding: "11px 14px", borderRadius: 12, fontSize: 13, background: lastR.ok ? "rgba(67,233,123,.1)" : "rgba(255,101,132,.1)", border: `1px solid ${lastR.ok ? "#43e97b" : "#ff6584"}`, color: lastR.ok ? "#43e97b" : "#ff6584" }}>
-                  {lastR.ok ? "✓ Correct!" : <>✗ Correct answer: <strong>{q.a}</strong></>}
+                <div style={{ marginTop: 10, padding: "11px 14px", borderRadius: 12, fontSize: 13, background: lastR.timedOut ? "rgba(251,191,36,.1)" : lastR.ok ? "rgba(67,233,123,.1)" : "rgba(255,101,132,.1)", border: `1px solid ${lastR.timedOut ? "#fbbf24" : lastR.ok ? "#43e97b" : "#ff6584"}`, color: lastR.timedOut ? "#fbbf24" : lastR.ok ? "#43e97b" : "#ff6584" }}>
+                  {lastR.timedOut ? "⏰ Time's up — question skipped" : lastR.ok ? "✓ Correct!" : <>✗ Correct answer: <strong>{q.a}</strong></>}
                 </div>
               )}
             </>
           );
         })()}
-
-        {!answered && (
-          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 18 }}>
-            <button
-              type="button"
-              onClick={onSkip}
-              style={{
-                background: "transparent",
-                border: `1px solid ${borderColor}`,
-                borderRadius: 10,
-                padding: "8px 16px",
-                color: mutedColor,
-                fontSize: 13,
-                fontWeight: 600,
-                cursor: "pointer",
-                fontFamily: "inherit",
-              }}
-            >
-              Skip question →
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -836,7 +822,6 @@ export default function DevQuiz() {
   const [score,    setScore]    = useState(0);
   const [results,  setResults]  = useState([]);
   const [timeLeft, setTimeLeft] = useState(20);
-  const [timeExpired, setTimeExpired] = useState(false);
   const [streak,   setStreak]   = useState(0);
   const [muted,    setMuted]    = useState(false);
 
@@ -859,6 +844,13 @@ export default function DevQuiz() {
   const lastCommitRef   = useRef(0);
   const timerRef        = useRef(null);
   const prevTimeRef     = useRef(null);
+  const curRef          = useRef(cur);
+  const qsRef           = useRef(qs);
+  const modeRef         = useRef(mode);
+
+  useEffect(() => { curRef.current = cur; }, [cur]);
+  useEffect(() => { qsRef.current = qs; }, [qs]);
+  useEffect(() => { modeRef.current = mode; }, [mode]);
 
   const bgColor   = theme?.bg   || "#0a0918";
   const textColor = theme?.text || "#fffffe";
@@ -876,12 +868,12 @@ export default function DevQuiz() {
   }, [phase]);
 
   useEffect(() => {
-    if (phase !== "playing" || answered || timeExpired || timeLeft <= 0) return;
+    if (phase !== "playing" || answered || timeLeft <= 0) return;
     if (prevTimeRef.current === null) { prevTimeRef.current = timeLeft; return; }
     if (timeLeft <= 5) getAudio().playUrgentTick();
     else getAudio().playTick();
     prevTimeRef.current = timeLeft;
-  }, [timeLeft, phase, answered, timeExpired]);
+  }, [timeLeft, phase, answered]);
 
   const cacheAnswers = (questions) => {
     const cache = {};
@@ -916,13 +908,14 @@ export default function DevQuiz() {
     const M = MODES.find(x => x.id === currentMode) || MODES[1];
     let tl = M.time;
     setTimeLeft(tl);
-    setTimeExpired(false);
     timerRef.current = setInterval(() => {
       tl--;
       setTimeLeft(Math.max(tl, 0));
       if (tl <= 0) {
         clearInterval(timerRef.current);
-        setTimeExpired(true);
+        if (!committedRef.current) {
+          commitRef.current(null, true, modeRef.current, qsRef.current, curRef.current);
+        }
       }
     }, 1000);
   }, []);
@@ -944,10 +937,10 @@ export default function DevQuiz() {
 
     const audio = getAudio();
     if (ok)                       audio.playCorrect();
-    else if (!blank && !timedOut) audio.playWrong();
+    else if (timedOut)            audio.playUrgentTick();
+    else if (!blank)              audio.playWrong();
 
-    // ── Determine emotions BEFORE entering any state updater ──────────────
-    const reactionEmotion = (timedOut || blank) ? "skipped" : ok ? "correct" : "wrong";
+    const reactionEmotion = timedOut ? "skipped" : ok ? "correct" : "wrong";
 
     // Update score / streak synchronously
     setAnswered(true);
@@ -960,7 +953,7 @@ export default function DevQuiz() {
 
     // Append result and derive the resting emotion from the updated list
     setResults(prev => {
-      const newResults   = [...prev, { q, userAnswer, ok, timedOut: timedOut || blank }];
+      const newResults   = [...prev, { q, userAnswer, ok, timedOut }];
       const correctCount = newResults.filter(r => r.ok).length;
       // Store settle emotion so the setTimeout below can read it
       pendingEmotionRef.current = getRestEmotion(correctCount);
@@ -997,7 +990,6 @@ export default function DevQuiz() {
         setSel(null);
         setFill("");
         setAnswered(false);
-        setTimeExpired(false);
         committedRef.current = false;
 
         // ── FIX: always reset to idle so character resumes walking ────────
@@ -1024,7 +1016,6 @@ export default function DevQuiz() {
     setScore(0);
     setResults([]);
     setStreak(0);
-    setTimeExpired(false);
     setCurrentEmotion("idle");
     setTimeLeft(M.time);
     setPhase("playing");
@@ -1034,7 +1025,6 @@ export default function DevQuiz() {
   const handleMCQ  = (i) => { if (!answered && canCommit()) commitRef.current(i); };
   const handleTF   = (v) => { if (!answered && canCommit()) commitRef.current(v); };
   const handleFill = ()  => { if (!answered && fill.trim() && canCommit()) commitRef.current(fill); };
-  const handleSkip = ()  => { if (!answered && canCommit()) commitRef.current(null, true); };
 
   useEffect(() => () => {
     clearInterval(timerRef.current);
@@ -1083,8 +1073,8 @@ export default function DevQuiz() {
         <PlayingScreen
           qs={qs} cur={cur} answered={answered} sel={sel} fill={fill}
           onFillChange={setFill} score={score} streak={streak} mode={mode}
-          timeLeft={timeLeft} timeExpired={timeExpired} results={results}
-          onMCQ={handleMCQ} onTF={handleTF} onFill={handleFill} onSkip={handleSkip}
+          timeLeft={timeLeft} results={results}
+          onMCQ={handleMCQ} onTF={handleTF} onFill={handleFill}
           getCorrectAnswer={getCA}
           theme={theme}
         />
