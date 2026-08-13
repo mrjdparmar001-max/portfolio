@@ -1,11 +1,16 @@
 import axios from "axios";
+import { attachRenderRetry, wakeRenderServer } from "./renderKeepAlive";
 
 const API = axios.create({
   baseURL: `${import.meta.env.VITE_API_URL}/api`,
+  timeout: 30000,
   headers: {
     "Content-Type": "application/json",
   },
 });
+
+attachRenderRetry(API);
+wakeRenderServer();
 
 API.interceptors.request.use((config) => {
   const token = localStorage.getItem("admin-token");

@@ -55,6 +55,14 @@ app.use(
 
 app.use(express.json());
 
+app.get("/api/health", (req, res) => {
+  res.status(200).json({
+    ok: true,
+    uptime: Math.floor(process.uptime()),
+    db: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+  });
+});
+
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/projects", require("./routes/projects"));
 app.use("/api/messages", require("./routes/messages"));

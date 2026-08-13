@@ -1,11 +1,16 @@
 import axios from 'axios';
+import { attachRenderRetry, wakeRenderServer } from './renderKeepAlive';
 
 // Environment Variable
 const BASE = import.meta.env.VITE_API_URL;
 
 const API = axios.create({
   baseURL: `${BASE}/api`,
+  timeout: 30000,
 });
+
+attachRenderRetry(API);
+wakeRenderServer();
 
 // Attach JWT Token Automatically
 API.interceptors.request.use(
