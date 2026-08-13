@@ -267,15 +267,32 @@ function useCardWidth() {
 function ProjectCarousel({ projects, theme }) {
   const trackRef = useRef(null);
   const isDragging = useRef(false);
+  const isPaused = useRef(false);
+  const scrollDir = useRef(1);
   const startX = useRef(0);
   const startY = useRef(0);
   const scrollStart = useRef(0);
   const touchAxis = useRef(null);
+  const rafRef = useRef(null);
+  const resumeTimer = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const cardWidth = useCardWidth();
   const cardGap = cardWidth < 300 ? 16 : 20;
   const edgePad = cardWidth < 300 ? 48 : 80;
+  const AUTO_SPEED = 0.55;
+
+  const pauseAuto = useCallback(() => {
+    clearTimeout(resumeTimer.current);
+    isPaused.current = true;
+  }, []);
+
+  const resumeAuto = useCallback((delay = 800) => {
+    clearTimeout(resumeTimer.current);
+    resumeTimer.current = setTimeout(() => {
+      isPaused.current = false;
+    }, delay);
+  }, []);
 
   const updateScrollState = useCallback(() => {
     const el = trackRef.current;
@@ -284,6 +301,32 @@ function ProjectCarousel({ projects, theme }) {
     setCanScrollLeft(el.scrollLeft > 4);
     setCanScrollRight(el.scrollLeft < maxScroll - 4);
   }, []);
+
+  const tick = useCallback(() => {
+    const el = trackRef.current;
+    if (el && !isPaused.current && !isDragging.current && projects.length > 1) {
+      const maxScroll = el.scrollWidth - el.clientWidth;
+      if (maxScroll > 4) {
+        el.scrollLeft += AUTO_SPEED * scrollDir.current;
+        if (el.scrollLeft >= maxScroll - 1) {
+          el.scrollLeft = maxScroll;
+          scrollDir.current = -1;
+        } else if (el.scrollLeft <= 1) {
+          el.scrollLeft = 0;
+          scrollDir.current = 1;
+        }
+      }
+    }
+    rafRef.current = requestAnimationFrame(tick);
+  }, [projects.length]);
+
+  useEffect(() => {
+    rafRef.current = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(rafRef.current);
+      clearTimeout(resumeTimer.current);
+    };
+  }, [tick]);
 
   useEffect(() => {
     updateScrollState();
@@ -302,6 +345,7 @@ function ProjectCarousel({ projects, theme }) {
   const onMouseDown = (e) => {
     if (e.button !== 0) return;
     isDragging.current = true;
+    pauseAuto();
     startX.current = e.pageX;
     scrollStart.current = trackRef.current.scrollLeft;
     trackRef.current.style.cursor = 'grabbing';
@@ -311,6 +355,7 @@ function ProjectCarousel({ projects, theme }) {
     if (!isDragging.current) return;
     isDragging.current = false;
     if (trackRef.current) trackRef.current.style.cursor = 'grab';
+    resumeAuto(700);
   };
 
   const onMouseMove = (e) => {
@@ -321,6 +366,7 @@ function ProjectCarousel({ projects, theme }) {
 
   const onTouchStart = (e) => {
     touchAxis.current = null;
+    isDragging.current = false;
     startX.current = e.touches[0].pageX;
     startY.current = e.touches[0].pageY;
     scrollStart.current = trackRef.current.scrollLeft;
@@ -338,16 +384,25 @@ function ProjectCarousel({ projects, theme }) {
 
     if (touchAxis.current === 'y') return;
 
+    if (!isDragging.current) {
+      isDragging.current = true;
+      pauseAuto();
+    }
+
     trackRef.current.scrollLeft = scrollStart.current - dx;
   };
 
   const onTouchEnd = () => {
+    if (touchAxis.current === 'x') resumeAuto(900);
     touchAxis.current = null;
+    isDragging.current = false;
     updateScrollState();
   };
 
   const scrollByCard = (dir) => {
+    pauseAuto();
     trackRef.current?.scrollBy({ left: dir * (cardWidth + cardGap), behavior: 'smooth' });
+    resumeAuto(1000);
   };
 
   const btnBase = {
@@ -373,7 +428,11 @@ function ProjectCarousel({ projects, theme }) {
   if (projects.length === 0) return null;
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div
+      style={{ position: 'relative' }}
+      onMouseEnter={pauseAuto}
+      onMouseLeave={() => { if (!isDragging.current) resumeAuto(400); }}
+    >
       <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: edgePad, background: `linear-gradient(to right, ${theme.bg} 20%, transparent)`, zIndex: 10, pointerEvents: 'none' }} />
       <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: edgePad, background: `linear-gradient(to left, ${theme.bg} 20%, transparent)`, zIndex: 10, pointerEvents: 'none' }} />
 
