@@ -1,5 +1,22 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
+
+function useDesktopCursor() {
+  const [enabled, setEnabled] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.innerWidth >= 1024;
+  });
+
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px)');
+    const update = () => setEnabled(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
+
+  return enabled;
+}
 
 /**
  * DiamondCursor — optimized version.
@@ -12,6 +29,7 @@ import { useTheme } from '../context/ThemeContext';
  * - Burst expansion rate tuned for smoother feel
  */
 export default function DiamondCursor() {
+  const enabled = useDesktopCursor();
   const { theme } = useTheme();
   const canvasRef = useRef(null);
   const stateRef = useRef({
@@ -104,6 +122,8 @@ export default function DiamondCursor() {
   }, [drawDiamond]);
 
   useEffect(() => {
+    if (!enabled) return undefined;
+
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     const s = stateRef.current;
@@ -194,7 +214,9 @@ export default function DiamondCursor() {
       window.removeEventListener('click', onClick);
       document.documentElement.style.cursor = '';
     };
-  }, [drawDiamond, drawBurst]);
+  }, [enabled, drawDiamond, drawBurst]);
+
+  if (!enabled) return null;
 
   return (
     <canvas
