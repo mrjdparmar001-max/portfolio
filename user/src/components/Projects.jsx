@@ -4,7 +4,7 @@ import { useTheme } from '../context/ThemeContext';
 import { getProjects } from '../api/api';
 import { FiGithub, FiExternalLink, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 
-const BASE = (import.meta.env.VITE_BACKEND_URL || '').replace(/\/+$/, '');
+const BASE = (import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
 
 function imgUrl(raw) {
   if (!raw) return '';

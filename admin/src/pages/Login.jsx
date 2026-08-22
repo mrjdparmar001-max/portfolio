@@ -16,7 +16,7 @@ export default function Login({ onLogin }) {
       localStorage.setItem('admin-token', res.data.token);
       onLogin();
     } catch {
-      setError('Invalid credentials. Try admin@jaydip.com / admin123');
+      setError('Invalid email or password. Please try again.');
     }
     setLoading(false);
   };

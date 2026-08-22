@@ -1,16 +1,15 @@
 import axios from "axios";
-import { attachRenderRetry, wakeRenderServer } from "./renderKeepAlive";
+
+const rawBase = (import.meta.env.VITE_API_URL || import.meta.env.VITE_BACKEND_URL || '').replace(/\/+$/, '');
+const BASE_URL = rawBase ? `${rawBase}/api` : '/api';
 
 const API = axios.create({
-  baseURL: `${import.meta.env.VITE_API_URL}/api`,
+  baseURL: BASE_URL,
   timeout: 30000,
   headers: {
     "Content-Type": "application/json",
   },
 });
-
-attachRenderRetry(API);
-wakeRenderServer();
 
 API.interceptors.request.use((config) => {
   const token = localStorage.getItem("admin-token");

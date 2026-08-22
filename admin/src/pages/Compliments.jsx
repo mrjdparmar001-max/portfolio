@@ -24,7 +24,7 @@ export default function Compliments() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Delete this compliment?')) return;
+    if (!window.confirm('Delete this compliment?')) return;
     await deleteCompliment(id);
     load();
   };

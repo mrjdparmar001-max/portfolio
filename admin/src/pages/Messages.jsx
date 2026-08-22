@@ -42,7 +42,7 @@ export default function Messages({ onUpdate }) {
 };
 
   const handleDelete = async (id) => {
-    if (!confirm('Delete this message?')) return;
+    if (!window.confirm('Delete this message?')) return;
     await deleteMessage(id);
     load();
   };
@@ -142,18 +142,15 @@ export default function Messages({ onUpdate }) {
                           }}
                         />
                         <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                            onClick={() => {
-    console.log("SEND CLICKED");
-    handleReply(msg._id);
-  }}
-                          // disabled={sending === msg._id}
+                          whileHover={{ scale: sending === msg._id ? 1 : 1.05 }}
+                          whileTap={{ scale: sending === msg._id ? 1 : 0.95 }}
+                          onClick={() => handleReply(msg._id)}
+                          disabled={sending === msg._id || !replyText[msg._id]?.trim()}
                           style={{
                             background: 'linear-gradient(135deg, #6c63ff, #ff6584)',
                             border: 'none', borderRadius: 10, padding: '12px 20px',
-                            color: '#fff', cursor: 'pointer', fontSize: 18,
-                            display: 'flex', alignItems: 'center',
+                            color: '#fff', cursor: (sending === msg._id || !replyText[msg._id]?.trim()) ? 'not-allowed' : 'pointer', fontSize: 18,
+                            display: 'flex', alignItems: 'center', opacity: (sending === msg._id || !replyText[msg._id]?.trim()) ? 0.6 : 1,
                           }}
                         >
                           <FiSend />

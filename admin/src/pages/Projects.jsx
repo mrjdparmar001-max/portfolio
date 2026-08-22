@@ -4,7 +4,7 @@ import { getProjects, createProject, updateProject, deleteProject, uploadImage }
 import { FiPlus, FiEdit2, FiTrash2, FiX, FiCheck, FiUpload, FiExternalLink, FiGithub } from 'react-icons/fi';
 
 // ── Base URL from env (no trailing slash) ────────────────────────────────────
-const BASE = (import.meta.env.VITE_BACKEND_URL || '').replace(/\/+$/, '');
+const BASE = (import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
 
 // ── Always returns a fully-qualified image URL ────────────────────────────────
 function imgUrl(raw) {

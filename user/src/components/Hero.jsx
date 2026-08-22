@@ -5,7 +5,7 @@ import { useTheme } from '../context/ThemeContext';
 import { FiGithub, FiLinkedin, FiMail, FiDownload, FiTwitter } from 'react-icons/fi';
 import { getProfile } from '../api/api';
 
-const BASE = (import.meta.env.VITE_BACKEND_URL || '').replace(/\/$/, '');
+const BASE = (import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
 const FALLBACK_AVATAR =
   'https://api.dicebear.com/9.x/avataaars/svg?seed=JaydipParmar&backgroundColor=transparent&style=transparent&accessories=prescription02&clothing=blazerAndShirt&eyes=happy&eyebrows=default&facialHair=beardMedium&facialHairColor=2c1b18&hair=short02&hairColor=2c1b18&skinColor=f8d25c';
 
@@ -290,8 +290,14 @@ export default function Hero() {
 
   const avatarSrc = avatarPath || FALLBACK_AVATAR;
   const downloadResume = async () => {
+    if (!resumePath) return;
+    const fullUrl = /^https?:\/\//i.test(resumePath)
+      ? resumePath
+      : `${BASE}/${resumePath.replace(/^\/+/, '')}`;
+
     try {
-      const response = await fetch(resumePath);
+      const response = await fetch(fullUrl);
+      if (!response.ok) throw new Error('Network response was not ok');
       const blob = await response.blob();
 
       const url = window.URL.createObjectURL(blob);
@@ -306,7 +312,8 @@ export default function Hero() {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      console.error("Download Failed:", err);
+      console.warn("Direct download failed, opening in new tab:", err);
+      window.open(fullUrl, "_blank", "noopener,noreferrer");
     }
   };
   const resumeHref = resumePath || '';

@@ -11,7 +11,7 @@
     { key: 'location', label: 'Location', icon: <FiMapPin />, type: 'text', placeholder: 'City, Country' },
   ];
 
-  const BASE = import.meta.env.VITE_API_URL;
+  const BASE = (import.meta.env.VITE_API_URL || import.meta.env.VITE_BACKEND_URL || '').replace(/\/+$/, '');
 
   // ─── Helper: PNG Blob → WebP Blob ────────────────────────────────────────────
   // Re-encodes the transparent PNG (from bg removal) to WebP for smaller file

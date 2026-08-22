@@ -32,7 +32,7 @@ export default function Skills() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Delete this category?')) return;
+    if (!window.confirm('Delete this category?')) return;
     await deleteSkill(id);
     load();
   };

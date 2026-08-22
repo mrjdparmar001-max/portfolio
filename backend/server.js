@@ -7,9 +7,8 @@ const dns = require("dns");
 const path = require("path");
 
 const isProduction = process.env.NODE_ENV === "production";
-const isRender = Boolean(process.env.RENDER);
 
-if (!isProduction && !isRender) {
+if (!isProduction) {
   dns.setDefaultResultOrder("ipv4first");
   dns.setServers(["8.8.8.8", "1.1.1.1"]);
 }
@@ -19,7 +18,7 @@ const missingEnv = requiredEnv.filter((key) => !process.env[key]);
 
 if (missingEnv.length > 0) {
   console.error(`Missing required environment variables: ${missingEnv.join(", ")}`);
-  console.error("Add them in the Render dashboard under Environment.");
+  console.error("Add them to your .env file or environment settings.");
   process.exit(1);
 }
 
@@ -98,5 +97,5 @@ mongoose
   .catch((err) => {
     console.error("❌ MongoDB Connection Failed");
     console.error(err.message);
-    console.error("Check MONGO_URI in Render and MongoDB Atlas Network Access (allow 0.0.0.0/0).");
+    console.error("Check MONGO_URI in your .env file and MongoDB Atlas Network Access (allow your IP or 0.0.0.0/0).");
   });

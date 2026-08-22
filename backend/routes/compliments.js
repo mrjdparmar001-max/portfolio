@@ -5,7 +5,16 @@ const router = express.Router();
 
 router.post('/', async (req, res) => {
   try {
-    const comp = new Compliment(req.body);
+    const { name, message, rating } = req.body;
+    if (!name || !message) {
+      return res.status(400).json({ message: 'Name and message are required' });
+    }
+    const comp = new Compliment({
+      name: String(name).trim(),
+      message: String(message).trim(),
+      rating: Math.min(5, Math.max(1, Number(rating) || 5)),
+      approved: false,
+    });
     await comp.save();
     res.status(201).json({ message: 'Thank you for your compliment!' });
   } catch (err) {

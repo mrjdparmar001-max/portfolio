@@ -1,9 +1,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { motion, useInView, useMotionValue, useSpring, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
-import axios from 'axios';
-
-const API = `${import.meta.env.VITE_API_URL}/api`;
+import { getSkills, getProjects, getProfile } from '../api/api';
 
 /* ─── CountUp ─────────────────────────────────────────────────────────────── */
 function CountUp({ to, duration = 1.5 }) {
@@ -281,12 +279,12 @@ export default function About() {
   // FIX: reduced parallax range for smoother scroll
   const bgY = useTransform(scrollYProgress, [0, 1], ['0%', '12%']);
 
-  // FIX: merged 3 separate API calls into Promise.all — single network batch
+  // Merged API calls into Promise.all using centralized API client
   useEffect(() => {
     Promise.all([
-      axios.get(`${API}/skills`).catch(() => ({ data: [] })),
-      axios.get(`${API}/projects`).catch(() => ({ data: [] })),
-      axios.get(`${API}/profile`).catch(() => ({ data: {} })),
+      getSkills().catch(() => ({ data: [] })),
+      getProjects().catch(() => ({ data: [] })),
+      getProfile().catch(() => ({ data: {} })),
     ]).then(([skillsRes, projectsRes, profileRes]) => {
       setSkills(skillsRes.data);
       const p = profileRes.data;
